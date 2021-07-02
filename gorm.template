@@ -1,0 +1,129 @@
+package {{ .PackageName }}
+
+import (
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+func Add{{$.ModelName}}(db *gorm.DB, m *{{$.ModelName}}) error {
+	return db.Save(m).Error
+}
+
+// https://gorm.cn/zh_CN/docs/query.html
+// 注意 当使用结构作为条件查询时，GORM 只会查询非零值字段。这意味着如果您的字段值为 0、''、false 或其他 零值，该字段不会被用于构建查询条件
+func Query{{$.ModelName}}sWithPaginate(db *gorm.DB, condition *{{$.ModelName}}, pageSize, currentPage int) ([]*{{$.ModelName}}, int64,error) {
+	res := make([]*{{$.ModelName}}, 0)
+    var totalCount int64
+    err = db.Where(condition).
+        Offset((currentPage - 1) * pageSize).
+		Find(&res).
+        Offset(-1).
+        Count(&totalCount).Error
+	if err != nil {
+		t.Fatal(err)
+		return res, totalCount, err
+	}
+	return res, totalCount, nil
+}
+{{ range .UniqueColumns }}
+{{ if .IsCompositeIndex }}
+{{  range .Columns  }} {{/* if composite index, generate function for each column */}}
+func Update{{$.ModelName}}By{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}, up map[string]interface{}) (int64, error) {
+	if err := db.Where("{{.Column}} = ?", {{.VarName}}).Updates(up).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+
+func Delete{{$.ModelName}}By{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}) (int64, error) {
+	if err := db.Where("{{.Column}} = ?", {{.VarName}}).Delete(&{{$.ModelName}}{}).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+
+func Query{{$.ModelName}}sBy{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}) ([]{{$.ModelName}}, error) {
+	res := make([]{{$.ModelName}}, 0)
+	if err := db.Where("{{.Column}} = ?", {{.VarName}}).Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+{{ end }} {{/* {{  range .Columns  }}  */}}
+func Update{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB  {{.FunctionArgs}}, up map[string]interface{}) (int64, error) {
+	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).Updates(up).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+func Delete{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB {{.FunctionArgs}}) (int64, error) {
+	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).Delete(&{{$.ModelName}}{}).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+
+func Get{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB {{.FunctionArgs}}) ({{$.ModelName}}, bool, error) {
+	var res {{$.ModelName}}
+	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).First(&res).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound){
+			return res, false, nil
+		}
+		return res, false, err
+	}
+	return res, false, nil
+}
+{{ else }}
+{{ range .Columns }}
+func Update{{$.ModelName}}By{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}, up map[string]interface{}) (int64, error) {
+	if err := db.Where("{{.Column}} = ?", {{.VarName}}).Updates(up).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+
+func Delete{{$.ModelName}}By{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}) (int64, error) {
+	if err := db.Where("{{.Column}} = ?", {{.VarName}}).Delete(&{{$.ModelName}}{}).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+
+func Get{{$.ModelName}}By{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}) ({{$.ModelName}}, bool, error) {
+	var res {{$.ModelName}}
+	if err := db.Where("{{.Column}} = ?", {{.VarName}}).First(&res).Error; err != nil {
+		if errors.Is(err,gorm.ErrRecordNotFound){
+			return res, false, nil
+		}
+		return res, false, err
+	}
+	return res, false, nil
+}
+{{ end }} {{/* range .Columns */}}
+{{ end }} {{/* if .IsCompositeIndex */}}
+{{ end }} {{/* range .UniqueColumns */}}
+{{  range .Columns  }}
+func Update{{$.ModelName}}By{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}, up map[string]interface{}) (int64, error) {
+	if err := db.Where("{{.Column}} = ?", {{.VarName}}).Updates(up).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+
+func Delete{{$.ModelName}}By{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}) (int64, error) {
+	if err := db.Where("{{.Column}} = ?", {{.VarName}}).Delete(&{{$.ModelName}}{}).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+
+func Query{{$.ModelName}}sBy{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}) ([]{{$.ModelName}}, error) {
+	res := make([]{{$.ModelName}}, 0)
+	if err := db.Where("{{.Column}} = ?", {{.VarName}}).Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+{{ end }}
+
+
