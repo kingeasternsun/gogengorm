@@ -25,6 +25,7 @@ type structType struct {
 	node *ast.StructType
 }
 type Config struct {
+	templateFile         string
 	file                 string
 	structName           string
 	fset                 *token.FileSet
@@ -40,8 +41,9 @@ type Config struct {
 
 func parseConfig(args []string) (*Config, error) {
 	var (
-		flagFile   = flag.String("file", "", "Filename to be parsed")
-		flagStruct = flag.String("struct", "", "Struct name to be processed")
+		flagFile     = flag.String("file", "", "Filename to be parsed")
+		templateFile = flag.String("template", "gorm.template", "template to use generate code")
+		flagStruct   = flag.String("struct", "", "Struct name to be processed")
 	)
 
 	if err := flag.CommandLine.Parse(args); err != nil {
@@ -54,9 +56,9 @@ func parseConfig(args []string) (*Config, error) {
 		return nil, flag.ErrHelp
 	}
 	cfg := &Config{
-		file: *flagFile,
-
-		structName: *flagStruct,
+		file:         *flagFile,
+		templateFile: *templateFile,
+		structName:   *flagStruct,
 	}
 
 	return cfg, nil
@@ -463,9 +465,9 @@ func (cfg *Config) GenerateGormCode() error {
 
 	extractUniqueIndex(models)
 
-	fmt.Printf("%+v", models)
+	// fmt.Printf("%+v", models)
 
 	fileDir := filepath.Dir(cfg.file)
 
-	return generateGormCode(models, fileDir)
+	return generateGormCode(models, fileDir, cfg.templateFile)
 }

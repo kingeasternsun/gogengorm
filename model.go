@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -43,9 +45,15 @@ func extractUniqueIndex(models []ModelType) {
 
 }
 
-func generateGormCode(models []ModelType, fileDir string) error {
+func generateGormCode(models []ModelType, fileDir, templateFile string) error {
 
-	tpl, err := template.ParseFiles("./gorm.template")
+	fmt.Println(templateFile)
+	templateBytes, err := ioutil.ReadFile(templateFile)
+	if err != nil {
+		return err
+	}
+
+	tpl, err := template.New("orm").Parse(string(templateBytes))
 	if err != nil {
 		return err
 	}
@@ -58,7 +66,7 @@ func generateGormCode(models []ModelType, fileDir string) error {
 			return err
 		}
 
-		err = tpl.ExecuteTemplate(rd, "gorm.template", model)
+		err = tpl.ExecuteTemplate(rd, "orm", model)
 		if err != nil {
 			rd.Close()
 			return err

@@ -67,3 +67,8 @@ finally we use command below to generate the golang code
 ```shell
 gogengorm -file ./testdata/user.go -struct UserLink
 ```
+
+you can also specify your own template file to generate code 
+```shell
+gogengorm -file ./testdata/user.go -struct UserLink -template youowntemplate
+```
