@@ -13,6 +13,8 @@ type ColumnType struct {
 	VarName string
 	// the unique index name, include primary
 	UniqueIndexName string
+	// the index name, without unique index
+	IndexName string
 }
 
 type UniqueColumn struct {
@@ -86,7 +88,15 @@ func extractColumn(fieldName, tagName string) (column ColumnType) {
 			if len(kv) == 1 {
 				column.UniqueIndexName = strings.TrimSpace(fieldName)
 			} else if len(kv) > 1 {
-				column.UniqueIndexName = strings.TrimSpace(kv[1])
+				subStrs := strings.Split(kv[1], ",")
+				if len(subStrs) == 0 || subStrs[0] == "" {
+					//  gorm:"uniqueIndex:,sort:desc"
+					column.UniqueIndexName = strings.TrimSpace(fieldName)
+				} else {
+					//  gorm:"uniqueIndex:idx_name,sort:desc"
+					column.UniqueIndexName = strings.TrimSpace(kv[1])
+				}
+
 			}
 
 		} else {

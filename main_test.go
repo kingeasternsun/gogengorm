@@ -5,8 +5,9 @@ import "testing"
 func TestGenerate(t *testing.T) {
 
 	cfg := Config{
-		file:       "./testdata/user.go",
-		structName: "UserLink",
+		file:         "./testdata/user.go",
+		structName:   "UserLink",
+		templateFile: "./gorm.template",
 	}
 
 	err := cfg.GenerateGormCode()

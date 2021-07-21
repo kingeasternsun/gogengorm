@@ -13,7 +13,7 @@ type ModelType struct {
 	PackageName   string
 	ModelName     string
 	Columns       []ColumnType
-	UniqueColumns []UniqueColumn //TODO if detect unique index, we should generate different gorm code.
+	UniqueColumns []UniqueColumn // if detect unique index, we should generate different gorm code.
 }
 
 // extract the unique index columns from the normal columns
@@ -22,7 +22,7 @@ func extractUniqueIndex(models []ModelType) {
 	for i := range models {
 
 		var normalColumns []ColumnType
-		uniqueIndexColumns := make(map[string][]ColumnType)
+		uniqueIndexColumns := make(map[string][]ColumnType) // colum has the same index name ,build the composite index
 
 		for j := range models[i].Columns {
 			if models[i].Columns[j].UniqueIndexName == "" {
