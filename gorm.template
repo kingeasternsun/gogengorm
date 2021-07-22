@@ -11,7 +11,7 @@ func Add{{$.ModelName}}(db *gorm.DB, m *{{$.ModelName}}) error {
 
 // https://gorm.cn/zh_CN/docs/query.html
 // 注意 当使用结构作为条件查询时，GORM 只会查询非零值字段。这意味着如果您的字段值为 0、''、false 或其他 零值，该字段不会被用于构建查询条件
-func Query{{$.ModelName}}sWithPaginate(db *gorm.DB, condition *{{$.ModelName}}, pageSize, currentPage int) ([]*{{$.ModelName}}, int64,error) {
+func Query{{$.ModelName}}sWithPaginate(db *gorm.DB, condition *{{$.ModelName}}, pageSize, currentPage int) ([]*{{$.ModelName}}, int64, error) {
 	res := make([]*{{$.ModelName}}, 0)
     var totalCount int64
     err = db.Where(condition).
@@ -65,7 +65,7 @@ func Delete{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}) (
 func Get{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}) ({{$.ModelName}}, bool, error) {
 	var res {{$.ModelName}}
 	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).First(&res).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound){
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, false, nil
 		}
 		return res, false, err
@@ -91,7 +91,7 @@ func Delete{{$.ModelName}}By{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}
 func Get{{$.ModelName}}By{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}) ({{$.ModelName}}, bool, error) {
 	var res {{$.ModelName}}
 	if err := db.Where("{{.Column}} = ?", {{.VarName}}).First(&res).Error; err != nil {
-		if errors.Is(err,gorm.ErrRecordNotFound){
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, false, nil
 		}
 		return res, false, err
@@ -124,8 +124,6 @@ func Query{{$.ModelName}}sBy{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}
 	return res, nil
 }
 {{ end }}
-
-
 {{ range .IndexColumns }}
 {{ if .IsCompositeIndex }}
 func Update{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}, up map[string]interface{}) (int64, error) {
@@ -152,7 +150,7 @@ func Query{{$.ModelName}}sBy{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}) (
 
 // https://gorm.cn/zh_CN/docs/query.html
 // 注意 当使用结构作为条件查询时，GORM 只会查询非零值字段。这意味着如果您的字段值为 0、''、false 或其他 零值，该字段不会被用于构建查询条件
-func Query{{$.ModelName}}sBy{{.FunctionSufix}}WithPaginate(db *gorm.DB, {{.FunctionArgs}}, pageSize, currentPage int) ([]*{{$.ModelName}}, int64,error) {
+func Query{{$.ModelName}}sBy{{.FunctionSufix}}WithPaginate(db *gorm.DB, {{.FunctionArgs}}, pageSize, currentPage int) ([]*{{$.ModelName}}, int64, error) {
 	res := make([]*{{$.ModelName}}, 0)
     var totalCount int64
     err = db.Where("{{.WhereCondition}}", {{.WhereArgs}}).
