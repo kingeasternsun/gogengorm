@@ -41,11 +41,13 @@ func (col UniqueColumn) FunctionSufix() string {
 // generate function args
 func (col UniqueColumn) FunctionArgs() string {
 	res := strings.Builder{}
-	for _, column := range col.Columns {
-		res.WriteString(" , ")
+	for i, column := range col.Columns {
 		res.WriteString(column.VarName)
 		res.WriteString(" ")
 		res.WriteString(column.GoType)
+		if i != len(col.Columns)-1 {
+			res.WriteString(", ")
+		}
 	}
 	return res.String()
 }
@@ -69,7 +71,7 @@ func (col UniqueColumn) WhereArgs() string {
 	for i, column := range col.Columns {
 		res.WriteString(column.VarName)
 		if i != len(col.Columns)-1 {
-			res.WriteString(" , ")
+			res.WriteString(", ")
 		}
 	}
 	return res.String()

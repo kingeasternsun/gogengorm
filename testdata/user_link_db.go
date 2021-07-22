@@ -20,7 +20,6 @@ func QueryUserLinksWithPaginate(db *gorm.DB, condition *UserLink, pageSize, curr
         Offset(-1).
         Count(&totalCount).Error
 	if err != nil {
-		t.Fatal(err)
 		return res, totalCount, err
 	}
 	return res, totalCount, nil
@@ -72,22 +71,22 @@ func QueryUserLinksByToUser(db *gorm.DB, toUser string) ([]UserLink, error) {
 	return res, nil
 }
  
-func UpdateUserLinkByFromUserAndToUser(db *gorm.DB   , fromUser string , toUser string, up map[string]interface{}) (int64, error) {
-	if err := db.Where("from_user = ? And to_user = ? ", fromUser , toUser).Updates(up).Error; err != nil {
+func UpdateUserLinkByFromUserAndToUser(db *gorm.DB, fromUser string, toUser string, up map[string]interface{}) (int64, error) {
+	if err := db.Where("from_user = ? And to_user = ? ", fromUser, toUser).Updates(up).Error; err != nil {
 		return 0, err
 	}
 	return db.RowsAffected, nil
 }
-func DeleteUserLinkByFromUserAndToUser(db *gorm.DB  , fromUser string , toUser string) (int64, error) {
-	if err := db.Where("from_user = ? And to_user = ? ", fromUser , toUser).Delete(&UserLink{}).Error; err != nil {
+func DeleteUserLinkByFromUserAndToUser(db *gorm.DB, fromUser string, toUser string) (int64, error) {
+	if err := db.Where("from_user = ? And to_user = ? ", fromUser, toUser).Delete(&UserLink{}).Error; err != nil {
 		return 0, err
 	}
 	return db.RowsAffected, nil
 }
 
-func GetUserLinkByFromUserAndToUser(db *gorm.DB  , fromUser string , toUser string) (UserLink, bool, error) {
+func GetUserLinkByFromUserAndToUser(db *gorm.DB, fromUser string, toUser string) (UserLink, bool, error) {
 	var res UserLink
-	if err := db.Where("from_user = ? And to_user = ? ", fromUser , toUser).First(&res).Error; err != nil {
+	if err := db.Where("from_user = ? And to_user = ? ", fromUser, toUser).First(&res).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound){
 			return res, false, nil
 		}
@@ -151,3 +150,4 @@ func QueryUserLinksByScore(db *gorm.DB, score int) ([]UserLink, error) {
 
 
 
+ 

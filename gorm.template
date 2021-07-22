@@ -20,7 +20,6 @@ func Query{{$.ModelName}}sWithPaginate(db *gorm.DB, condition *{{$.ModelName}}, 
         Offset(-1).
         Count(&totalCount).Error
 	if err != nil {
-		t.Fatal(err)
 		return res, totalCount, err
 	}
 	return res, totalCount, nil
@@ -50,20 +49,20 @@ func Query{{$.ModelName}}sBy{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}
 	return res, nil
 }
 {{ end }} {{/* {{  range .Columns  }}  */}}
-func Update{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB  {{.FunctionArgs}}, up map[string]interface{}) (int64, error) {
+func Update{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}, up map[string]interface{}) (int64, error) {
 	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).Updates(up).Error; err != nil {
 		return 0, err
 	}
 	return db.RowsAffected, nil
 }
-func Delete{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB {{.FunctionArgs}}) (int64, error) {
+func Delete{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}) (int64, error) {
 	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).Delete(&{{$.ModelName}}{}).Error; err != nil {
 		return 0, err
 	}
 	return db.RowsAffected, nil
 }
 
-func Get{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB {{.FunctionArgs}}) ({{$.ModelName}}, bool, error) {
+func Get{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}) ({{$.ModelName}}, bool, error) {
 	var res {{$.ModelName}}
 	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).First(&res).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound){
@@ -127,3 +126,44 @@ func Query{{$.ModelName}}sBy{{.FieldName}}(db *gorm.DB, {{.VarName}} {{.GoType}}
 {{ end }}
 
 
+{{ range .IndexColumns }}
+{{ if .IsCompositeIndex }}
+func Update{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}, up map[string]interface{}) (int64, error) {
+	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).Updates(up).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+func Delete{{$.ModelName}}By{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}) (int64, error) {
+	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).Delete(&{{$.ModelName}}{}).Error; err != nil {
+		return 0, err
+	}
+	return db.RowsAffected, nil
+}
+
+func Query{{$.ModelName}}sBy{{.FunctionSufix}}(db *gorm.DB, {{.FunctionArgs}}) ([]{{$.ModelName}}, error) {
+	res := make([]{{$.ModelName}}, 0)
+	if err := db.Where("{{.WhereCondition}}", {{.WhereArgs}}).Find(&res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
+
+}
+
+// https://gorm.cn/zh_CN/docs/query.html
+// 注意 当使用结构作为条件查询时，GORM 只会查询非零值字段。这意味着如果您的字段值为 0、''、false 或其他 零值，该字段不会被用于构建查询条件
+func Query{{$.ModelName}}sBy{{.FunctionSufix}}WithPaginate(db *gorm.DB, {{.FunctionArgs}}, pageSize, currentPage int) ([]*{{$.ModelName}}, int64,error) {
+	res := make([]*{{$.ModelName}}, 0)
+    var totalCount int64
+    err = db.Where("{{.WhereCondition}}", {{.WhereArgs}}).
+        Offset((currentPage - 1) * pageSize).
+		Find(&res).
+        Offset(-1).
+        Count(&totalCount).Error
+	if err != nil {
+		return res, totalCount, err
+	}
+	return res, totalCount, nil
+}
+{{ end }} {{/* if .IsCompositeIndex */}}
+{{ end }} {{/* range .IndexColumns */}}

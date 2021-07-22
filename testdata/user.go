@@ -18,3 +18,9 @@ type UserLink struct {
 	ToUser   string `json:"toUser,omitempty" form:"toUser" binding:"required" gorm:"column:to_user;uniqueIndex:idx_from_to"`
 	Score    int    `json:"score,omitempty" form:"score" binding:"required" gorm:"column:score"`
 }
+
+type UserSell struct {
+	ID   int    `json:"id,omitempty"  gorm:"column:id;index:idx_id_item"`
+	Item string `json:"item,omitempty"  gorm:"column:item;index:idx_id_item"`
+	Num  int    `json:"num,omitempty" gorm:"column:num"`
+}

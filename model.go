@@ -54,10 +54,10 @@ func extractIndex(models []ModelType) {
 		indexColumns := make(map[string][]ColumnType) // colum has the same index name ,build the composite index
 
 		for j := range models[i].Columns {
-			if models[i].Columns[j].IndexName == "" {
+			if indexName := models[i].Columns[j].IndexName; indexName == "" {
 				normalColumns = append(normalColumns, models[i].Columns[j])
 			} else {
-				indexColumns[models[i].Columns[j].IndexName] = append(indexColumns[models[i].Columns[j].UniqueIndexName], models[i].Columns[j])
+				indexColumns[indexName] = append(indexColumns[indexName], models[i].Columns[j])
 			}
 		}
 
