@@ -464,6 +464,7 @@ func (cfg *Config) GenerateGormCode() error {
 	}
 
 	extractUniqueIndex(models)
+	extractIndex(models)
 
 	// fmt.Printf("%+v", models)
 

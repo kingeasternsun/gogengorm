@@ -14,6 +14,7 @@ type ModelType struct {
 	ModelName     string
 	Columns       []ColumnType
 	UniqueColumns []UniqueColumn // if detect unique index, we should generate different gorm code.
+	IndexColumns  []UniqueColumn // if detect composite index, we should generate different gorm code.
 }
 
 // extract the unique index columns from the normal columns
@@ -39,6 +40,34 @@ func extractUniqueIndex(models []ModelType) {
 
 		sort.Slice(models[i].UniqueColumns, func(j, k int) bool {
 			return models[i].UniqueColumns[j].IndexName > models[i].UniqueColumns[k].IndexName
+		})
+
+	}
+
+}
+
+func extractIndex(models []ModelType) {
+
+	for i := range models {
+
+		var normalColumns []ColumnType
+		indexColumns := make(map[string][]ColumnType) // colum has the same index name ,build the composite index
+
+		for j := range models[i].Columns {
+			if models[i].Columns[j].IndexName == "" {
+				normalColumns = append(normalColumns, models[i].Columns[j])
+			} else {
+				indexColumns[models[i].Columns[j].IndexName] = append(indexColumns[models[i].Columns[j].UniqueIndexName], models[i].Columns[j])
+			}
+		}
+
+		models[i].Columns = normalColumns
+		for k, v := range indexColumns {
+			models[i].IndexColumns = append(models[i].IndexColumns, UniqueColumn{IndexName: k, Columns: v})
+		}
+
+		sort.Slice(models[i].IndexColumns, func(j, k int) bool {
+			return models[i].IndexColumns[j].IndexName > models[i].IndexColumns[k].IndexName
 		})
 
 	}

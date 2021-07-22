@@ -83,7 +83,7 @@ func extractColumn(fieldName, tagName string) (column ColumnType) {
 	for _, opt := range opts {
 
 		// support composite index
-		if strings.Contains(opt, "primaryKey") || strings.Contains(opt, "unique") || strings.Contains(opt, "uniqueIndex") {
+		if strings.HasPrefix(opt, "primaryKey") || strings.HasPrefix(opt, "unique") || strings.HasPrefix(opt, "uniqueIndex") {
 			kv := strings.Split(opt, ":")
 			if len(kv) == 1 {
 				column.UniqueIndexName = strings.TrimSpace(fieldName)
@@ -99,6 +99,21 @@ func extractColumn(fieldName, tagName string) (column ColumnType) {
 
 			}
 
+		} else if strings.HasPrefix(opt, "index") {
+			kv := strings.Split(opt, ":")
+			if len(kv) == 1 {
+				column.IndexName = strings.TrimSpace(fieldName)
+			} else if len(kv) > 1 {
+				subStrs := strings.Split(kv[1], ",")
+				if len(subStrs) == 0 || subStrs[0] == "" {
+					//  gorm:"index:,sort:desc"
+					column.IndexName = strings.TrimSpace(fieldName)
+				} else {
+					//  gorm:"index:idx_name,sort:desc"
+					column.IndexName = strings.TrimSpace(kv[1])
+				}
+
+			}
 		} else {
 			kv := strings.Split(opt, ":")
 			if len(kv) != 2 {
